@@ -56,3 +56,19 @@ func (r *ManagerRepositoryImpl) GetAll() ([]model.Manager, error) {
 	}
 	return managers, nil
 }
+func (r *ManagerRepositoryImpl) ExistById(id int) (bool, error) {
+	var manager model.Manager
+	result := r.Db.First(&manager, id)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, result.Error
+	}
+	return true, nil
+}
+func (r *ManagerRepositoryImpl) ExistByAccount(account string) (bool, error) {
+	var manager model.Manager
+	result := r.Db.First(&manager, "account = ?", account)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, result.Error
+	}
+	return true, nil
+}

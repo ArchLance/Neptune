@@ -15,7 +15,13 @@ type ParamErr struct {
 type DbErr struct {
 	Err error
 }
-type LogicError struct {
+type LogicErr struct {
+	Err error
+}
+type NotFoundErr struct {
+	Err error
+}
+type ExistErr struct {
 	Err error
 }
 
@@ -31,6 +37,12 @@ func (e DbErr) Error() string {
 	return e.Err.Error()
 }
 
-func (e LogicError) Error() string {
+func (e LogicErr) Error() string {
+	return e.Err.Error()
+}
+func (e NotFoundErr) Error() string {
+	return e.Err.Error()
+}
+func (e ExistErr) Error() string {
 	return e.Err.Error()
 }

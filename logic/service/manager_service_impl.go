@@ -25,7 +25,11 @@ func NewManagerServiceImpl(repository repository.ManagerRepository, validate *va
 func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error {
 	err := r.Validate.Struct(manager)
 	if err != nil {
-		return myerrors.ParamErr{Err: fmt.Errorf("service: 创建管理员校验参数失败 -> %w", err)}
+		return myerrors.ParamErr{Err: fmt.Errorf("service: 创建管理员参数校验失败 -> %w", err)}
+	}
+	exist, err := r.ManagerRepository.ExistByAccount(manager.Account)
+	if exist {
+		return myerrors.ExistErr{Err: fmt.Errorf("service: 管理员账号已经存在 -> %w", err)}
 	}
 	managerModel := model.Manager{
 		Level:    manager.Level,
@@ -35,7 +39,7 @@ func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error 
 	}
 	err = r.ManagerRepository.Create(managerModel)
 	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 创建管理员失败 -> %w", err)}
+		return myerrors.DbErr{Err: err}
 	}
 	return nil
 }
@@ -43,7 +47,7 @@ func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error 
 func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error {
 	managerData, err := r.ManagerRepository.GetById(manager.Id)
 	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 更新管理员时查找管理员失败 -> %w", err)}
+		return myerrors.NotFoundErr{Err: err}
 	}
 	managerData.Level = manager.Level
 	managerData.Name = manager.Name
@@ -51,7 +55,7 @@ func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error 
 	managerData.Password = manager.Password
 	err = r.ManagerRepository.Update(managerData)
 	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 更新管理员失败 -> %w", err)}
+		return myerrors.DbErr{Err: err}
 	}
 	return nil
 }
@@ -59,7 +63,7 @@ func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error 
 func (r *ManagerServiceImpl) Delete(id int) error {
 	err := r.ManagerRepository.Delete(id)
 	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 删除管理员失败 -> %w", err)}
+		return myerrors.DbErr{Err: err}
 	}
 	return nil
 }
@@ -67,7 +71,7 @@ func (r *ManagerServiceImpl) Delete(id int) error {
 func (r *ManagerServiceImpl) GetById(id int) (response.ManagerResponse, error) {
 	managerData, err := r.ManagerRepository.GetById(id)
 	if err != nil {
-		return response.ManagerResponse{}, myerrors.DbErr{Err: fmt.Errorf("service: 查找管理员id:%d失败 -> %w", id, err)}
+		return response.ManagerResponse{}, myerrors.NotFoundErr{Err: err}
 	}
 	managerResponse := response.ManagerResponse{
 		Level:    managerData.Level,
@@ -81,7 +85,7 @@ func (r *ManagerServiceImpl) GetById(id int) (response.ManagerResponse, error) {
 func (r *ManagerServiceImpl) GetAll() ([]response.ManagerResponse, error) {
 	result, err := r.ManagerRepository.GetAll()
 	if err != nil {
-		return []response.ManagerResponse{}, myerrors.DbErr{Err: fmt.Errorf("service: 查找全部管理员失败 -> %w", err)}
+		return []response.ManagerResponse{}, myerrors.NotFoundErr{Err: err}
 	}
 	var managers []response.ManagerResponse
 	for _, manager := range result {

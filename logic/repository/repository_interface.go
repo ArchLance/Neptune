@@ -10,4 +10,6 @@ type ManagerRepository interface {
 	Delete(id int) error
 	GetById(id int) (model.Manager, error)
 	GetAll() ([]model.Manager, error)
+	ExistById(id int) (bool, error)
+	ExistByAccount(account string) (bool, error)
 }

@@ -33,7 +33,7 @@ func (controller *ManagerController) Create(ctx *gin.Context) {
 
 	err = controller.ManagerService.Create(createManagerRequest)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.DbErr{Err: fmt.Errorf("controller: 创建管理员失败 -> %w", err)})
+		rsp.ErrRsp(ctx, err)
 		return
 	}
 	rsp.SuccessRspWithNoData(ctx)
@@ -50,7 +50,7 @@ func (controller *ManagerController) Update(ctx *gin.Context) {
 
 	err = controller.ManagerService.Update(updateManagerRequest)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.DbErr{Err: fmt.Errorf("controller: 更新管理员失败 -> %w", err)})
+		rsp.ErrRsp(ctx, err)
 		return
 	}
 	rsp.SuccessRspWithNoData(ctx)
@@ -66,7 +66,7 @@ func (controller *ManagerController) Delete(ctx *gin.Context) {
 
 	err = controller.ManagerService.Delete(id)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.DbErr{Err: fmt.Errorf("controller: 删除管理员id %d 失败 -> %w", id, err)})
+		rsp.ErrRsp(ctx, err)
 		return
 	}
 	rsp.SuccessRspWithNoData(ctx)
@@ -81,7 +81,7 @@ func (controller *ManagerController) GetById(ctx *gin.Context) {
 	}
 	manager, err := controller.ManagerService.GetById(id)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.DbErr{Err: fmt.Errorf("controller: 查找管理员id %d 失败 -> %w", id, err)})
+		rsp.ErrRsp(ctx, err)
 		return
 	}
 	rsp.SuccessRsp(ctx, manager)
@@ -90,7 +90,7 @@ func (controller *ManagerController) GetAll(ctx *gin.Context) {
 	log.Info().Msg("Get all manager")
 	managers, err := controller.ManagerService.GetAll()
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.DbErr{Err: fmt.Errorf("controller: 查找全部管理员失败 -> %w", err)})
+		rsp.ErrRsp(ctx, err)
 		return
 	}
 	rsp.SuccessRsp(ctx, managers)
