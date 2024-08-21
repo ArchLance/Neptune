@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/go-playground/validator/v10"
-	"github.com/rs/zerolog/log"
+	log "github.com/sirupsen/logrus"
 	"neptune/config"
 	"neptune/logic/controller"
 	"neptune/logic/model"
@@ -10,11 +10,33 @@ import (
 	"neptune/logic/router"
 	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
+	"neptune/utils/logger"
 	"net/http"
+	"strings"
 )
 
+func setupLogrus() error {
+	// 配置日志等级
+	log.SetLevel(log.InfoLevel)
+	logLevel := "debug"
+	if l, ok := logger.FlagLToLevel[strings.ToLower(logLevel)]; ok {
+		log.SetLevel(l)
+	}
+	// 日志格式
+	log.SetFormatter(&logger.SimpleFormatter{})
+	// 日志输出
+	log.SetOutput(logger.GetWriter())
+	return nil
+}
+
+func init() {
+	if err := setupLogrus(); err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
-	log.Info().Msg("Started Server!")
+
 	db := config.DatabaseConnection()
 	validate := validator.New()
 	err := db.Table("manager").AutoMigrate(&model.Manager{})

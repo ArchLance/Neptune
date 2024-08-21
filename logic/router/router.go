@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"neptune/logic/controller"
+	"neptune/utils/logger"
 	"net/http"
 )
 
@@ -13,6 +14,7 @@ type ConfigRouterGroup struct {
 
 func NewRouter(config ConfigRouterGroup) *gin.Engine {
 	routers := gin.Default()
+	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
 	routers.GET("", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "Welcome go")
 	})

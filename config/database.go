@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"neptune/utils/errors"
+	"neptune/utils/logger"
 )
 
 const (
@@ -13,12 +14,12 @@ const (
 	port     = "43306"
 	user     = "root"
 	password = "123456"
-	dbname   = "student_manage"
+	dbname   = "neptune"
 )
 
 func DatabaseConnection() *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", user, password, host, port, dbname)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.NewGormLogger(), NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	errors.ErrorPanic(err)
 	return db
 }
