@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"student_manage/logic/model"
-	myerrors "student_manage/utils/errors"
+	"neptune/logic/model"
+	myerrors "neptune/utils/errors"
 )
 
 type ManagerRepositoryImpl struct {

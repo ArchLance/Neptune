@@ -1,8 +1,8 @@
 package service
 
 import (
-	"student_manage/logic/data/request"
-	"student_manage/logic/data/response"
+	"neptune/logic/data/request"
+	"neptune/logic/data/response"
 )
 
 type ManagerService interface {

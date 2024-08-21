@@ -3,11 +3,11 @@ package service
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"student_manage/logic/data/request"
-	"student_manage/logic/data/response"
-	"student_manage/logic/model"
-	"student_manage/logic/repository"
-	myerrors "student_manage/utils/errors"
+	"neptune/logic/data/request"
+	"neptune/logic/data/response"
+	"neptune/logic/model"
+	"neptune/logic/repository"
+	myerrors "neptune/utils/errors"
 )
 
 type ManagerServiceImpl struct {

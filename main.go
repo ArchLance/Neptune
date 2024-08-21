@@ -3,14 +3,14 @@ package main
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
+	"neptune/config"
+	"neptune/logic/controller"
+	"neptune/logic/model"
+	"neptune/logic/repository"
+	"neptune/logic/router"
+	"neptune/logic/service"
+	myerrors "neptune/utils/errors"
 	"net/http"
-	"student_manage/config"
-	"student_manage/logic/controller"
-	"student_manage/logic/model"
-	"student_manage/logic/repository"
-	"student_manage/logic/router"
-	"student_manage/logic/service"
-	myerrors "student_manage/utils/errors"
 )
 
 func main() {

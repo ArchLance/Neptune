@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"neptune/logic/data/request"
+	"neptune/logic/service"
+	myerrors "neptune/utils/errors"
+	"neptune/utils/rsp"
 	"strconv"
-	"student_manage/logic/data/request"
-	"student_manage/logic/service"
-	myerrors "student_manage/utils/errors"
-	"student_manage/utils/rsp"
 )
 
 // 这里以ManagerService接口当做参数，

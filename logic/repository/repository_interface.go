@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"student_manage/logic/model"
+	"neptune/logic/model"
 )
 
 type ManagerRepository interface {

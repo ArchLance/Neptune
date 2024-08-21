@@ -2,8 +2,8 @@ package rsp
 
 import (
 	"errors"
+	errorType "neptune/utils/errors"
 	"net/http"
-	errorType "student_manage/utils/errors"
 
 	"github.com/gin-gonic/gin"
 )

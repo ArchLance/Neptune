@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"neptune/logic/controller"
 	"net/http"
-	"student_manage/logic/controller"
 )
 
 type ConfigRouterGroup struct {

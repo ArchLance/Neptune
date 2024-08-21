@@ -1,4 +1,4 @@
-module student_manage
+module neptune
 
 go 1.22
 
