@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
+	log "github.com/sirupsen/logrus"
 	"neptune/logic/data/request"
 	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
@@ -11,7 +11,6 @@ import (
 	"strconv"
 )
 
-// 这里以ManagerService接口当做参数，
 type ManagerController struct {
 	ManagerService service.ManagerService
 }
@@ -23,7 +22,7 @@ func NewManagerController(service service.ManagerService) *ManagerController {
 }
 
 func (controller *ManagerController) Create(ctx *gin.Context) {
-	log.Info().Msg("Create manager")
+	log.Info("controller: 创建管理员")
 	createManagerRequest := request.CreateManagerRequest{}
 	err := ctx.ShouldBind(&createManagerRequest)
 	if err != nil {
@@ -40,7 +39,7 @@ func (controller *ManagerController) Create(ctx *gin.Context) {
 }
 
 func (controller *ManagerController) Update(ctx *gin.Context) {
-	log.Info().Msg("Update manager")
+	log.Info("controller: 更新管理员")
 	updateManagerRequest := request.UpdateManagerRequest{}
 	err := ctx.ShouldBind(&updateManagerRequest)
 	if err != nil {
@@ -56,7 +55,8 @@ func (controller *ManagerController) Update(ctx *gin.Context) {
 	rsp.SuccessRspWithNoData(ctx)
 }
 func (controller *ManagerController) Delete(ctx *gin.Context) {
-	log.Info().Msg("Delete manager")
+	log.Info("controller: 删除管理员")
+	// 获取参数
 	managerId := ctx.Param("id")
 	id, err := strconv.Atoi(managerId)
 	if err != nil {
@@ -72,7 +72,8 @@ func (controller *ManagerController) Delete(ctx *gin.Context) {
 	rsp.SuccessRspWithNoData(ctx)
 }
 func (controller *ManagerController) GetById(ctx *gin.Context) {
-	log.Info().Msg("Get manager")
+	log.Info("controller: 查找管理员")
+	// 获取参数
 	managerId := ctx.Param("id")
 	id, err := strconv.Atoi(managerId)
 	if err != nil {
@@ -87,7 +88,7 @@ func (controller *ManagerController) GetById(ctx *gin.Context) {
 	rsp.SuccessRsp(ctx, manager)
 }
 func (controller *ManagerController) GetAll(ctx *gin.Context) {
-	log.Info().Msg("Get all manager")
+	log.Info("controller: 查找所有管理员")
 	managers, err := controller.ManagerService.GetAll()
 	if err != nil {
 		rsp.ErrRsp(ctx, err)
