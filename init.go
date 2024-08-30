@@ -28,6 +28,7 @@ func init() {
 	if err := setupLogrus(); err != nil {
 		log.Fatal(err)
 	}
+	setupGorm()
 }
 
 // 初始化数据库

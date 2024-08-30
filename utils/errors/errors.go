@@ -25,6 +25,14 @@ type ExistErr struct {
 	Err error
 }
 
+type TokenInvalidErr struct {
+	Err error
+}
+
+func (e TokenInvalidErr) Error() string {
+	return e.Err.Error()
+}
+
 func (e RequestErr) Error() string {
 	return e.Err.Error()
 }

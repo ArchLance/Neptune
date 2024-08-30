@@ -9,22 +9,30 @@ import (
 )
 
 func errRsp(c *gin.Context, codeErr int, codeErrMsg string) {
-	c.JSON(http.StatusInternalServerError, gin.H{
+	c.JSON(http.StatusOK, gin.H{
+		"code": codeErr,
+		"msg":  codeErrMsg,
+	})
+}
+
+func authErrRsp(c *gin.Context, codeErr int, codeErrMsg string) {
+	c.JSON(http.StatusUnauthorized, gin.H{
 		"code": codeErr,
 		"msg":  codeErrMsg,
 	})
 }
 
 func ErrRsp(c *gin.Context, err error) {
-	var requestErr errorType.RequestErr
+	//var requestErr errorType.RequestErr
+	var tokenInvalidErr errorType.TokenInvalidErr
 	var paramErr errorType.ParamErr
 	var dbErr errorType.DbErr
 	var logicError errorType.LogicErr
 	var notFoundErr errorType.NotFoundErr
 	var existErr errorType.ExistErr
 	switch {
-	case errors.As(err, &requestErr):
-		errRsp(c, errorType.CodeRequestFailed, "请求错误")
+	case errors.As(err, &tokenInvalidErr):
+		errRsp(c, errorType.CodeErrTokenInvalid, err.Error())
 	case errors.As(err, &paramErr):
 		errRsp(c, errorType.CodeParamInvalid, "参数错误")
 	case errors.As(err, &notFoundErr):
