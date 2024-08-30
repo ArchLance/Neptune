@@ -1,27 +1,18 @@
 package main
 
 import (
-	"github.com/go-playground/validator/v10"
-	"neptune/global"
-	"neptune/logic/controller"
-	"neptune/logic/repository"
+	"github.com/gin-gonic/gin"
 	"neptune/logic/router"
-	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
+	"neptune/utils/logger"
 	"net/http"
 )
 
+// 编译时要编译整个包 package
 func main() {
-
-	validate := validator.New()
-	managerRepository := repository.NewManagerRepositoryImpl(global.DB)
-	managerService := service.NewManagerServiceImpl(managerRepository, validate)
-	managerController := controller.NewManagerController(managerService)
-	routerConfig := router.ConfigRouterGroup{
-		BasePath:          "/api",
-		ManagerController: managerController,
-	}
-	routers := router.NewRouter(routerConfig)
+	routers := gin.Default()
+	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
+	routers = router.CollectRoute(routers)
 	server := http.Server{Addr: ":9001", Handler: routers}
 	err := server.ListenAndServe()
 	myerrors.ErrorPanic(err)

@@ -115,12 +115,13 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 func GenerateToken(c *gin.Context, Id int, role string) string {
 	//生成token信息
 	j := NewJWT()
+	exp := time.Now().Add(time.Hour * time.Duration(global.ServerConfig.JWTKey.ExpireTime)) // ExpireTime以小时为单位
 	claims := CustomClaims{
 		UserID:   uint(Id),
 		UserRole: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(global.ServerConfig.JWTKey.ExpireTime))), // ExpireTime以小时为单位
+			ExpiresAt: jwt.NewNumericDate(exp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}

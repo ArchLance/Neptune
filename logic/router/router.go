@@ -35,10 +35,13 @@ func NewRouter(config ConfigRouterGroup) *gin.Engine {
 }
 
 func CollectRoute(routers *gin.Engine) *gin.Engine {
-	userGroup := routers.Group("/user")
+
+	baseRouter := routers.Group("/api/v1")
+
+	userGroup := baseRouter.Group("/user")
 	{
 		//用户登陆
-		userGroup.POST("/login", controller.Login)
+		userGroup.GET("/login", controller.Login)
 		//用户登出
 		//userGroup.POST("/logout", controller.Logout)
 		//用户信息修改
