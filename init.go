@@ -40,7 +40,6 @@ func initConfig() {
 		log.Info("Config file changed:", e.Name)
 	})
 	serverConfig := config.ServerConfig{}
-	log.Info(serverConfig)
 	//给serverConfig初始值
 	if err := v.Unmarshal(&serverConfig); err != nil {
 		panic(err)
