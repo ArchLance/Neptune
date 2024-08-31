@@ -2,7 +2,11 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"neptune/global"
 	"neptune/logic/controller"
+	"neptune/logic/repository"
+	"neptune/logic/service"
 	"neptune/utils/logger"
 	"neptune/utils/token"
 	"net/http"
@@ -13,7 +17,18 @@ type ConfigRouterGroup struct {
 	ManagerController *controller.ManagerController
 }
 
-func NewRouter(config ConfigRouterGroup) *gin.Engine {
+func NewConfigRouterGroup() *ConfigRouterGroup {
+	validate := validator.New()
+	managerRepository := repository.NewManagerRepositoryImpl(global.DB)
+	managerService := service.NewManagerServiceImpl(managerRepository, validate)
+	managerController := controller.NewManagerController(managerService)
+	return &ConfigRouterGroup{
+		BasePath:          "/api",
+		ManagerController: managerController,
+	}
+}
+
+func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 	routers := gin.Default()
 	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
 	routers.GET("", func(c *gin.Context) {
