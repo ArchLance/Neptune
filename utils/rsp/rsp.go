@@ -25,6 +25,7 @@ func authErrRsp(c *gin.Context, codeErr int, codeErrMsg string) {
 func ErrRsp(c *gin.Context, err error) {
 	//var requestErr errorType.RequestErr
 	var tokenInvalidErr errorType.TokenInvalidErr
+	var loginFailed errorType.LoginFailed
 	var paramErr errorType.ParamErr
 	var dbErr errorType.DbErr
 	var logicError errorType.LogicErr
@@ -33,16 +34,18 @@ func ErrRsp(c *gin.Context, err error) {
 	switch {
 	case errors.As(err, &tokenInvalidErr):
 		errRsp(c, errorType.CodeErrTokenInvalid, err.Error())
+	case errors.As(err, &loginFailed):
+		errRsp(c, errorType.CodeLoginFailed, err.Error())
 	case errors.As(err, &paramErr):
-		errRsp(c, errorType.CodeParamInvalid, "参数错误")
+		errRsp(c, errorType.CodeParamInvalid, err.Error())
 	case errors.As(err, &notFoundErr):
-		errRsp(c, errorType.CodeDataNotFound, "数据查找不到")
+		errRsp(c, errorType.CodeDataNotFound, err.Error())
 	case errors.As(err, &existErr):
-		errRsp(c, errorType.CodeDataExist, "数据已经存在")
+		errRsp(c, errorType.CodeDataExist, err.Error())
 	case errors.As(err, &dbErr):
-		errRsp(c, errorType.CodeDbError, "数据库错误")
+		errRsp(c, errorType.CodeDbError, err.Error())
 	case errors.As(err, &logicError):
-		errRsp(c, errorType.CodeLogicError, "逻辑错误")
+		errRsp(c, errorType.CodeLogicError, err.Error())
 	default:
 		errRsp(c, errorType.CodeUnknown, "未知错误")
 	}

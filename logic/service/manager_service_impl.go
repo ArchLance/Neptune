@@ -45,6 +45,10 @@ func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error 
 }
 
 func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error {
+	err := r.Validate.Struct(manager)
+	if err != nil {
+		return myerrors.ParamErr{Err: fmt.Errorf("service: 更新管理员参数校验失败 -> %w", err)}
+	}
 	managerData, err := r.ManagerRepository.GetById(manager.Id)
 	if err != nil {
 		return myerrors.NotFoundErr{Err: err}

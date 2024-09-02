@@ -8,6 +8,7 @@ import (
 	"neptune/logic/repository"
 	"neptune/logic/service"
 	"neptune/utils/logger"
+	middlewares "neptune/utils/middleware"
 	"neptune/utils/token"
 	"net/http"
 )
@@ -15,6 +16,7 @@ import (
 type ConfigRouterGroup struct {
 	BasePath          string
 	ManagerController *controller.ManagerController
+	UserController    *controller.UserController
 }
 
 func NewConfigRouterGroup() *ConfigRouterGroup {
@@ -22,14 +24,20 @@ func NewConfigRouterGroup() *ConfigRouterGroup {
 	managerRepository := repository.NewManagerRepositoryImpl(global.DB)
 	managerService := service.NewManagerServiceImpl(managerRepository, validate)
 	managerController := controller.NewManagerController(managerService)
+	userRepository := repository.NewUserRepositoryImpl(global.DB)
+	userService := service.NewUserServiceImpl(userRepository, validate)
+	userController := controller.NewUserController(userService)
+
 	return &ConfigRouterGroup{
 		BasePath:          "/api",
 		ManagerController: managerController,
+		UserController:    userController,
 	}
 }
 
 func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 	routers := gin.Default()
+	routers.Use(middlewares.Cors())
 	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
 	routers.GET("", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "Welcome go")
@@ -46,21 +54,11 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		managerRouter.DELETE("/:id", config.ManagerController.Delete)
 
 	}
-	return routers
-}
 
-func CollectRoute(routers *gin.Engine) *gin.Engine {
-
-	baseRouter := routers.Group("/api/v1")
-
-	userGroup := baseRouter.Group("/user")
+	userRouter := baseRouter.Group("/user")
 	{
-		//用户登陆
-		userGroup.GET("/login", controller.Login)
-		//用户登出
-		//userGroup.POST("/logout", controller.Logout)
-		//用户信息修改
-		userGroup.Use(token.JWTAuth())
+		userRouter.POST("/login", config.UserController.Login)
+		userRouter.Use(token.JWTAuth())
 		{
 			////用户修改密码
 			//userGroup.POST("/changePassword", controller.ChangePassword)
@@ -75,6 +73,35 @@ func CollectRoute(routers *gin.Engine) *gin.Engine {
 
 		}
 	}
-
 	return routers
 }
+
+//func CollectRoute(routers *gin.Engine) *gin.Engine {
+//
+//	baseRouter := routers.Group("/api/v1")
+//
+//	userGroup := baseRouter.Group("/user")
+//	{
+//		//用户登陆
+//		userGroup.GET("/login", controller.Login)
+//		//用户登出
+//		//userGroup.POST("/logout", controller.Logout)
+//		//用户信息修改
+//		userGroup.Use(token.JWTAuth())
+//		{
+//			////用户修改密码
+//			//userGroup.POST("/changePassword", controller.ChangePassword)
+//			////获取用户列表
+//			//userGroup.POST("/list", controller.GetUserList)
+//			////上传文件（给某个用户发送文件）
+//			//userGroup.POST("/uploadFile", controller.UploadFile)
+//			////查看文件（查看所有用户给自己发送的文件）
+//			//userGroup.POST("/fileList", controller.GetFileList)
+//			////下载文件（下载别的用户发给自己的文件）
+//			//userGroup.POST("/downloadFile", controller.DownloadFile)
+//
+//		}
+//	}
+//
+//	return routers
+//}

@@ -15,11 +15,8 @@ type ManagerRepository interface {
 }
 
 type UserRepository interface {
-	Create(user model.User) error
-	Update(user model.User) error
-	Delete(id int) error
+	Update(user *model.User) error
 	GetById(id int) (model.User, error)
-	GetAll() ([]model.User, error)
-	ExistById(id int) (bool, error)
-	ExistByEmail(account string) (bool, error)
+	GetByAccount(account string) (model.User, error)
+	GetByEmail(email string) (model.User, error)
 }

@@ -12,20 +12,40 @@ type UserRepositoryImpl struct {
 	Db *gorm.DB
 }
 
-func (r *UserRepositoryImpl) ExistById(id int) (bool, error) {
-	var user model.User
-	result := r.Db.First(&user, id)
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return false, result.Error
-	}
-	return true, nil
+func NewUserRepositoryImpl(Db *gorm.DB) *UserRepositoryImpl {
+	return &UserRepositoryImpl{Db: Db}
 }
-
+func (r *UserRepositoryImpl) Update(user *model.User) error {
+	result := r.Db.Updates(&user)
+	if result.Error != nil {
+		return myerrors.DbErr{Err: fmt.Errorf("repository: 更新用户失败 -> %w", result.Error)}
+	}
+	return nil
+}
 func (r *UserRepositoryImpl) GetById(id int) (model.User, error) {
 	var user model.User
-	result := r.Db.First(&user, id)
+	result := r.Db.First(&user, "id=?", id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		return user, myerrors.DbErr{Err: fmt.Errorf("repository: 查找用户id %d失败 -> %w", id, result.Error)}
+		return user, result.Error
+	}
+	return user, nil
+}
+
+func (r *UserRepositoryImpl) GetByAccount(account string) (model.User, error) {
+	var user model.User
+	result := r.Db.First(&user, "account=?", account)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return user, result.Error
+	}
+	return user, nil
+}
+
+func (r *UserRepositoryImpl) GetByEmail(email string) (model.User, error) {
+	var user model.User
+	result := r.Db.First(&user, "email=?", email)
+
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return user, result.Error
 	}
 	return user, nil
 }

@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 	"neptune/config"
 	"neptune/global"
 	"neptune/logic/model"
@@ -13,12 +17,21 @@ import (
 	"strings"
 )
 
+func DatabaseConnection() *gorm.DB {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", global.ServerConfig.DBconfig.User,
+		global.ServerConfig.DBconfig.Password, global.ServerConfig.DBconfig.Host, global.ServerConfig.DBconfig.Port, global.ServerConfig.DBconfig.DbName)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.NewGormLogger(), NamingStrategy: schema.NamingStrategy{SingularTable: true}})
+	myerrors.ErrorPanic(err)
+	return db
+}
+
 // 初始化数据库
 func setupGorm() {
 
-	db := config.DatabaseConnection()
+	db := DatabaseConnection()
 	err := db.Table("manager").AutoMigrate(&model.Manager{})
-
+	myerrors.ErrorPanic(err)
+	err = db.Table("user").AutoMigrate(&model.User{})
 	myerrors.ErrorPanic(err)
 	global.DB = db
 
@@ -66,6 +79,6 @@ func init() {
 	if err := setupLogrus(); err != nil {
 		log.Fatal(err)
 	}
-	setupGorm()
 	initConfig()
+	setupGorm()
 }

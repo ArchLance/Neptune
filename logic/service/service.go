@@ -12,3 +12,8 @@ type ManagerService interface {
 	GetById(id int) (response.ManagerResponse, error)
 	GetAll() ([]response.ManagerResponse, error)
 }
+
+type UserService interface {
+	Update(user request.UpdateUserRequest) error
+	Login(user request.UserLoginRequest) (response.UserResponse, error)
+}

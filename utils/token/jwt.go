@@ -112,7 +112,7 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 //	return "", TokenInvalid
 //}
 
-func GenerateToken(c *gin.Context, Id int, role string) string {
+func GenerateToken(Id int, role string) (string, error) {
 	//生成token信息
 	j := NewJWT()
 	exp := time.Now().Add(time.Hour * time.Duration(global.ServerConfig.JWTKey.ExpireTime)) // ExpireTime以小时为单位
@@ -128,8 +128,7 @@ func GenerateToken(c *gin.Context, Id int, role string) string {
 	//生成token
 	token, err := j.CreateToken(claims)
 	if err != nil {
-		rsp.ErrRsp(c, myerrors.TokenInvalidErr{Err: fmt.Errorf("token生成失败")})
-		return ""
+		return "", err
 	}
-	return token
+	return token, nil
 }

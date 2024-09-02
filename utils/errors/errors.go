@@ -28,6 +28,9 @@ type ExistErr struct {
 type TokenInvalidErr struct {
 	Err error
 }
+type LoginFailed struct {
+	Err error
+}
 
 func (e TokenInvalidErr) Error() string {
 	return e.Err.Error()
@@ -52,5 +55,8 @@ func (e NotFoundErr) Error() string {
 	return e.Err.Error()
 }
 func (e ExistErr) Error() string {
+	return e.Err.Error()
+}
+func (e LoginFailed) Error() string {
 	return e.Err.Error()
 }
