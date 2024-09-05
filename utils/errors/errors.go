@@ -32,6 +32,10 @@ type LoginFailed struct {
 	Err error
 }
 
+type UploadError struct {
+	Err error
+}
+
 func (e TokenInvalidErr) Error() string {
 	return e.Err.Error()
 }
@@ -58,5 +62,8 @@ func (e ExistErr) Error() string {
 	return e.Err.Error()
 }
 func (e LoginFailed) Error() string {
+	return e.Err.Error()
+}
+func (e UploadError) Error() string {
 	return e.Err.Error()
 }

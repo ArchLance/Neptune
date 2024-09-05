@@ -12,7 +12,7 @@ func main() {
 	//routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
 	//routers = router.CollectRoute(routers)
 	routers := router.NewRouter(router.NewConfigRouterGroup())
-	server := http.Server{Addr: ":9001", Handler: routers}
+	server := http.Server{Addr: "127.0.0.1:9001", Handler: routers}
 	err := server.ListenAndServe()
 	myerrors.ErrorPanic(err)
 }

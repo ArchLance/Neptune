@@ -31,6 +31,7 @@ func ErrRsp(c *gin.Context, err error) {
 	var logicError errorType.LogicErr
 	var notFoundErr errorType.NotFoundErr
 	var existErr errorType.ExistErr
+	var uploadErr errorType.UploadError
 	switch {
 	case errors.As(err, &tokenInvalidErr):
 		errRsp(c, errorType.CodeErrTokenInvalid, err.Error())
@@ -46,6 +47,8 @@ func ErrRsp(c *gin.Context, err error) {
 		errRsp(c, errorType.CodeDbError, err.Error())
 	case errors.As(err, &logicError):
 		errRsp(c, errorType.CodeLogicError, err.Error())
+	case errors.As(err, &uploadErr):
+		errRsp(c, errorType.CodeUploadError, err.Error())
 	default:
 		errRsp(c, errorType.CodeUnknown, "未知错误")
 	}

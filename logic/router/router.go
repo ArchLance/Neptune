@@ -24,6 +24,7 @@ func NewConfigRouterGroup() *ConfigRouterGroup {
 	managerRepository := repository.NewManagerRepositoryImpl(global.DB)
 	managerService := service.NewManagerServiceImpl(managerRepository, validate)
 	managerController := controller.NewManagerController(managerService)
+
 	userRepository := repository.NewUserRepositoryImpl(global.DB)
 	userService := service.NewUserServiceImpl(userRepository, validate)
 	userController := controller.NewUserController(userService)
@@ -37,12 +38,13 @@ func NewConfigRouterGroup() *ConfigRouterGroup {
 
 func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 	routers := gin.Default()
+	// 解决跨域问题
 	routers.Use(middlewares.Cors())
+	//
+	//routers.StaticFS("/media/upload/avatar", http.Dir("static/upload/avatar"))
+	// 自定义log
 	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
-	routers.GET("", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "Welcome go")
-	})
-
+	routers.StaticFS("/static/upload/avatar", http.Dir("static/upload/avatar"))
 	baseRouter := routers.Group(config.BasePath)
 
 	managerRouter := baseRouter.Group("/manager")
@@ -52,7 +54,6 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		managerRouter.POST("/create", config.ManagerController.Create)
 		managerRouter.PATCH("", config.ManagerController.Update)
 		managerRouter.DELETE("/:id", config.ManagerController.Delete)
-
 	}
 
 	userRouter := baseRouter.Group("/user")
@@ -60,6 +61,7 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		userRouter.POST("/login", config.UserController.Login)
 		userRouter.Use(token.JWTAuth())
 		{
+			userRouter.POST("/avatar", config.UserController.UploadAvatar)
 			////用户修改密码
 			//userGroup.POST("/changePassword", controller.ChangePassword)
 			////获取用户列表

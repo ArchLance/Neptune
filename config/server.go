@@ -5,8 +5,9 @@ type ServerConfig struct {
 	//Port      int         `mapstructure:"port" json:"port" yaml:"port"`
 	//Mysqlinfo MysqlConfig `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 	//Admininfo AdminConfig `mapstructure:"admin" json:"admin" yaml:"admin"`
-	JWTKey   JWTConfig `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
-	DBconfig DBConfig  `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
+	JWTKey   JWTConfig  `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
+	DBconfig DBConfig   `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
+	BaseConf BaseConfig `mapstructure:"base" json:"base" yaml:"base"`
 }
 
 type JWTConfig struct {
@@ -20,4 +21,12 @@ type DBConfig struct {
 	User     string `mapstructure:"user" json:"user" yaml:"user"`
 	Password string `mapstructure:"password" json:"password" yaml:"password"`
 	DbName   string `mapstructure:"dbname" json:"dbname" yaml:"dbname"`
+}
+
+type BaseConfig struct {
+	Upload Upload `mapstructure:"upload" json:"upload" yaml:"upload"`
+}
+
+type Upload struct {
+	Avatar string `mapstructure:"avatar" json:"avatar" yaml:"avatar"`
 }
