@@ -36,6 +36,10 @@ type UploadError struct {
 	Err error
 }
 
+type PermissionDeniedError struct {
+	Err error
+}
+
 func (e TokenInvalidErr) Error() string {
 	return e.Err.Error()
 }
@@ -65,5 +69,8 @@ func (e LoginFailed) Error() string {
 	return e.Err.Error()
 }
 func (e UploadError) Error() string {
+	return e.Err.Error()
+}
+func (e PermissionDeniedError) Error() string {
 	return e.Err.Error()
 }

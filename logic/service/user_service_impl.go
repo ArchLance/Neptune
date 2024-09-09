@@ -88,3 +88,31 @@ func (r *UserServiceImpl) Login(user *request.UserLoginRequest) (response.UserLo
 	}
 	return responseUser, nil
 }
+
+func (r *UserServiceImpl) ChangePassword(user *request.UserChangePasswordRequest) error {
+	err := r.Validate.Struct(user)
+	if err != nil {
+		return myerrors.ParamErr{Err: fmt.Errorf("service: 修改密码参数校验失败 -> %w", err)}
+	}
+	userData, err := r.UserRepository.GetByAccount(user.Account)
+	if err != nil {
+		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
+	}
+	// 判断用户名和当前用户是否一致
+	if userData.Account != user.Account {
+		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
+	}
+	//// 判断密码是否正确  此处要保证原密码校验通过才能修改密码
+	oldPassword := hash.SHA256DoubleString(user.OldPassword, false)
+	if userData.Password != oldPassword {
+		return myerrors.PermissionDeniedError{Err: fmt.Errorf("原密码错误")}
+	}
+
+	newPassword := hash.SHA256DoubleString(user.NewPassword, false)
+	userData.Password = newPassword
+	err = r.UserRepository.Update(&userData)
+	if err != nil {
+		return myerrors.DbErr{Err: fmt.Errorf("修改密码失败 -> %w", err)}
+	}
+	return nil
+}

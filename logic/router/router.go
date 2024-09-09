@@ -63,7 +63,7 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		{
 			userRouter.POST("/avatar", config.UserController.UploadAvatar)
 			////用户修改密码
-			//userGroup.POST("/changePassword", controller.ChangePassword)
+			userRouter.POST("/changePassword", config.UserController.ChangePassword)
 			//// 更新
 			userRouter.POST("/update", config.UserController.Update)
 			////上传文件（给某个用户发送文件）

@@ -13,3 +13,9 @@ type UpdateUserRequest struct {
 	Email    string `validate:"required,max=64,min=1" json:"email"`
 	Role     string `validate:"required,max=20,min=1" json:"role"`
 }
+
+type UserChangePasswordRequest struct {
+	Account     string `validate:"required,max=64,min=1"  json:"account"`
+	OldPassword string `validate:"required,max=64,min=1" json:"old_password"`
+	NewPassword string `validate:"required,max=64,min=1" json:"new_password"`
+}
