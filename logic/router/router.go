@@ -52,10 +52,10 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		managerRouter.GET("", config.ManagerController.GetAll)
 		managerRouter.GET("/:id", config.ManagerController.GetById)
 		managerRouter.POST("/create", config.ManagerController.Create)
-		managerRouter.PATCH("", config.ManagerController.Update)
+		managerRouter.POST("", config.ManagerController.Update)
 		managerRouter.DELETE("/:id", config.ManagerController.Delete)
 	}
-
+	// token authentation
 	userRouter := baseRouter.Group("/user")
 	{
 		userRouter.POST("/login", config.UserController.Login)
@@ -64,8 +64,8 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 			userRouter.POST("/avatar", config.UserController.UploadAvatar)
 			////用户修改密码
 			//userGroup.POST("/changePassword", controller.ChangePassword)
-			////获取用户列表
-			//userGroup.POST("/list", controller.GetUserList)
+			//// 更新
+			userRouter.POST("/update", config.UserController.Update)
 			////上传文件（给某个用户发送文件）
 			//userGroup.POST("/uploadFile", controller.UploadFile)
 			////查看文件（查看所有用户给自己发送的文件）

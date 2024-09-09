@@ -10,12 +10,14 @@ import (
 	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
 	"neptune/utils/file"
+	"neptune/utils/hash"
 	img "neptune/utils/image"
 	"neptune/utils/rsp"
 	"os"
 	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type UserController struct {
@@ -29,7 +31,7 @@ func NewUserController(service service.UserService) *UserController {
 }
 
 func (controller *UserController) Update(ctx *gin.Context) {
-	log.Info("controller: 创建管理员")
+	log.Info("controller: 更新用户")
 	updateUserRequest := request.UpdateUserRequest{}
 	err := ctx.ShouldBind(&updateUserRequest)
 	if err != nil {
@@ -80,13 +82,14 @@ func (controller *UserController) UploadAvatar(ctx *gin.Context) {
 		}
 		// 获得userId
 		userId := ctx.PostForm("userId")
-		fileName := userId
+		fileName := hash.Md5str(fmt.Sprintf("%s%s", f.Filename, time.Now().String()))
 		id, _ := strconv.Atoi(userId)
 		userResponse, err := controller.UserService.GetById(id)
 		if err != nil {
 			rsp.ErrRsp(ctx, myerrors.UploadError{Err: fmt.Errorf("获取用户信息失败")})
 			return
 		}
+
 		userRequest := request.UpdateUserRequest{
 			UserId:   id,
 			Avatar:   fmt.Sprintf("%s%s", fileName, fileExt),
