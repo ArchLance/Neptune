@@ -126,11 +126,10 @@ func (controller *UserController) UploadAvatar(ctx *gin.Context) {
 
 func (controller *UserController) ChangePassword(ctx *gin.Context) {
 	log.Info("用户修改密码")
-	// TODO: 此处POST参数为空 服务会直接500 需考虑加上异常处理
 	changePassword := request.UserChangePasswordRequest{}
 	err := ctx.ShouldBindJSON(&changePassword)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("参数错误 -> %w", err)})
 		return
 	}
 	err = controller.UserService.ChangePassword(&changePassword)
