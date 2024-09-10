@@ -129,7 +129,7 @@ func (controller *UserController) ChangePassword(ctx *gin.Context) {
 	changePassword := request.UserChangePasswordRequest{}
 	err := ctx.ShouldBindJSON(&changePassword)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("参数错误 -> %w", err)})
 		return
 	}
 	err = controller.UserService.ChangePassword(&changePassword)
