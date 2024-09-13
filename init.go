@@ -38,10 +38,11 @@ func RedisConnection() *redis.Client {
 }
 
 func initEmail() {
+	address := fmt.Sprintf("%s:%s", global.ServerConfig.MailConfig.Host, global.ServerConfig.MailConfig.Port)
 	p, err := email.NewPool(
-		"smtp.qq.com:25",
+		address,
 		4,
-		smtp.PlainAuth("", "XXX@qq.com", "你的授权码", "smtp.qq.com"),
+		smtp.PlainAuth("", global.ServerConfig.MailConfig.User, global.ServerConfig.MailConfig.AuthCode, global.ServerConfig.MailConfig.Host),
 	)
 	if err != nil {
 		log.Fatal("failed to create pool:", err)

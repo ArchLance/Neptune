@@ -9,6 +9,7 @@ type ServerConfig struct {
 	MysqlConfig MysqlConfig `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 	BaseConfig  BaseConfig  `mapstructure:"base" json:"base" yaml:"base"`
 	RedisConfig RedisConfig `mapstructure:"redis" json:"redis" yaml:"redis"`
+	MailConfig  MailConfig  `mapstructure:"mail" json:"mail" yaml:"mail"`
 }
 
 type JWTConfig struct {
@@ -39,4 +40,9 @@ type Upload struct {
 	Avatar string `mapstructure:"avatar" json:"avatar" yaml:"avatar"`
 }
 
-// TODO: 邮箱配置
+type MailConfig struct {
+	Host     string `mapstructure:"host" json:"host" yaml:"host"`
+	Port     string `mapstructure:"port" json:"port" yaml:"port"`
+	AuthCode string `mapstructure:"auth" json:"auth" yaml:"auth"`
+	User     string `mapstructure:"user" json:"user" yaml:"user"`
+}

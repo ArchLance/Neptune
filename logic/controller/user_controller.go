@@ -8,6 +8,7 @@ import (
 	"neptune/global"
 	"neptune/logic/data/request"
 	"neptune/logic/service"
+	email "neptune/utils/email"
 	myerrors "neptune/utils/errors"
 	"neptune/utils/file"
 	"neptune/utils/hash"
@@ -150,12 +151,34 @@ func (c *UserController) ChangePassword(ctx *gin.Context) {
 
 func (c *UserController) GenerateCode(ctx *gin.Context) {
 	log.Info("生成验证码")
-	requestEmail := ctx.Query("email")
+	// 查询用户
+	claims := jwt.GetClaims(ctx)
+	if claims == nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+		return
+	}
+	userResponse, err := c.UserService.GetById(claims.UserID)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+		return
+	}
+	// TODO： 获取redis中的验证码的过期时间，避免短时间内重复生成：
+	ok := global.Redis.Get(ctx, userResponse.Email)
+	if ok != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("请不要频繁发送验证码")})
+		return
+	}
+
 	code := random.GenValidateCode(6)
-	err := global.Redis.Set(ctx, requestEmail, code, 180*time.Second).Err()
-	// TODO 添加发送邮箱的函数
+	err = global.Redis.Set(ctx, userResponse.Email, code, 180*time.Second).Err()
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.DbErr{Err: err})
+		return
+	}
+	emailContent := fmt.Sprintf("您的验证码是：%s，此验证码3分钟有效。", code)
+	err = email.SendEmail(userResponse.Email, "邮箱绑定验证码", emailContent)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("发送邮件失败: %w", err)})
 		return
 	}
 	rsp.SuccessRspWithNoData(ctx)
@@ -163,9 +186,23 @@ func (c *UserController) GenerateCode(ctx *gin.Context) {
 
 func (c *UserController) CheckCode(ctx *gin.Context) {
 	log.Info("校验验证码")
-	requestEmail := ctx.Query("email")
 	requestCode := ctx.Query("code")
-	code, err := global.Redis.Get(ctx, requestEmail).Result()
+	if requestCode == "" {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码不能为空")})
+		return
+	}
+	claims := jwt.GetClaims(ctx)
+	if claims == nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+		return
+	}
+	userResponse, err := c.UserService.GetById(claims.UserID)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+		return
+	}
+
+	code, err := global.Redis.Get(ctx, userResponse.Email).Result()
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.NotFoundErr{Err: fmt.Errorf("验证码错误")})
 		return

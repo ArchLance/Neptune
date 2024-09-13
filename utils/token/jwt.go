@@ -41,7 +41,6 @@ func JWTAuth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// TODO: gin的上下文记录claims和userId的值  此处设置的userid是否会受并发问题影响
 		c.Set("claims", claims)
 		c.Next()
 	}
