@@ -43,10 +43,16 @@ func JWTAuth() gin.HandlerFunc {
 		}
 		// TODO: gin的上下文记录claims和userId的值  此处设置的userid是否会受并发问题影响
 		c.Set("claims", claims)
-		c.Set("userId", claims.UserID)
-		c.Set("userRole", claims.UserRole)
 		c.Next()
 	}
+}
+
+func GetClaims(c *gin.Context) *CustomClaims {
+	claims, exist := c.Get("claims")
+	if !exist {
+		return nil
+	}
+	return claims.(*CustomClaims)
 }
 
 type JWT struct {
@@ -61,7 +67,7 @@ var (
 // NewJWT 创建一个新的jwt实例
 func NewJWT() *JWT {
 	return &JWT{
-		[]byte(global.ServerConfig.JWTKey.SigningKey),
+		[]byte(global.ServerConfig.JWTConfig.SigningKey),
 	}
 }
 
@@ -115,7 +121,7 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 func GenerateToken(Id int, role string) (string, error) {
 	//生成token信息
 	j := NewJWT()
-	exp := time.Now().Add(time.Hour * time.Duration(global.ServerConfig.JWTKey.ExpireTime)) // ExpireTime以小时为单位
+	exp := time.Now().Add(time.Hour * time.Duration(global.ServerConfig.JWTConfig.ExpireTime)) // ExpireTime以小时为单位
 	claims := CustomClaims{
 		UserID:   uint(Id),
 		UserRole: role,

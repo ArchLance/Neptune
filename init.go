@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"github.com/jordan-wright/email"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
@@ -13,16 +15,38 @@ import (
 	"neptune/logic/model"
 	myerrors "neptune/utils/errors"
 	"neptune/utils/logger"
+	"net/smtp"
 	"os"
 	"strings"
 )
 
 func DatabaseConnection() *gorm.DB {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", global.ServerConfig.DBconfig.User,
-		global.ServerConfig.DBconfig.Password, global.ServerConfig.DBconfig.Host, global.ServerConfig.DBconfig.Port, global.ServerConfig.DBconfig.DbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", global.ServerConfig.MysqlConfig.User,
+		global.ServerConfig.MysqlConfig.Password, global.ServerConfig.MysqlConfig.Host, global.ServerConfig.MysqlConfig.Port, global.ServerConfig.MysqlConfig.DbName)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{Logger: logger.NewGormLogger(), NamingStrategy: schema.NamingStrategy{SingularTable: true}})
 	myerrors.ErrorPanic(err)
 	return db
+}
+
+func RedisConnection() *redis.Client {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     global.ServerConfig.RedisConfig.Host + ":" + global.ServerConfig.RedisConfig.Port,
+		Password: global.ServerConfig.RedisConfig.Password, // no password set
+		DB:       global.ServerConfig.RedisConfig.DbName,   // use default DB
+	})
+	return rdb
+}
+
+func initEmail() {
+	p, err := email.NewPool(
+		"smtp.qq.com:25",
+		4,
+		smtp.PlainAuth("", "XXX@qq.com", "你的授权码", "smtp.qq.com"),
+	)
+	if err != nil {
+		log.Fatal("failed to create pool:", err)
+	}
+	global.EmailPool = p
 }
 
 // 初始化数据库
@@ -33,8 +57,8 @@ func setupGorm() {
 	myerrors.ErrorPanic(err)
 	err = db.Table("user").AutoMigrate(&model.User{})
 	myerrors.ErrorPanic(err)
+	global.Redis = RedisConnection()
 	global.DB = db
-
 }
 
 func initConfig() {
@@ -81,4 +105,5 @@ func init() {
 	}
 	initConfig()
 	setupGorm()
+	//initEmail()
 }

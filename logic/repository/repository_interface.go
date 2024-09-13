@@ -16,7 +16,7 @@ type ManagerRepository interface {
 
 type UserRepository interface {
 	Update(user *model.User) error
-	GetById(id int) (model.User, error)
+	GetById(id uint) (model.User, error)
 	GetByAccount(account string) (model.User, error)
 	GetByEmail(email string) (model.User, error)
 }

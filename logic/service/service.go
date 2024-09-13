@@ -14,7 +14,7 @@ type ManagerService interface {
 }
 
 type UserService interface {
-	GetById(id int) (response.UserResponse, error)
+	GetById(id uint) (response.UserResponse, error)
 	Update(user *request.UpdateUserRequest) error
 	Login(user *request.UserLoginRequest) (response.UserLoginResponse, error)
 	ChangePassword(user *request.UserChangePasswordRequest) error

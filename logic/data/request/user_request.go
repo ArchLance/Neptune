@@ -6,7 +6,7 @@ type UserLoginRequest struct {
 }
 
 type UpdateUserRequest struct {
-	UserId   int    `json:"userid"`
+	UserId   uint   `json:"userid"`
 	Avatar   string `json:"avatar"`
 	UserName string `validate:"required,max=64,min=1" json:"username"`
 	Account  string `validate:"required,max=64,min=1"  json:"account"`
@@ -15,7 +15,7 @@ type UpdateUserRequest struct {
 }
 
 type UserChangePasswordRequest struct {
-	Account     string `validate:"required,max=64,min=1"  json:"account"`
+	UserId      uint   `validate:"max=64,min=1"  json:"user_id"`
 	OldPassword string `validate:"required,max=64,min=1" json:"old_password"`
 	NewPassword string `validate:"required,max=64,min=1" json:"new_password"`
 }

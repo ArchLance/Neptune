@@ -23,7 +23,7 @@ func NewUserServiceImpl(repository repository.UserRepository, validate *validato
 	}
 }
 
-func (r *UserServiceImpl) GetById(id int) (response.UserResponse, error) {
+func (r *UserServiceImpl) GetById(id uint) (response.UserResponse, error) {
 	userData, err := r.UserRepository.GetById(id)
 	if err != nil {
 		return response.UserResponse{}, myerrors.NotFoundErr{Err: err}
@@ -94,8 +94,7 @@ func (r *UserServiceImpl) ChangePassword(user *request.UserChangePasswordRequest
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 修改密码参数校验失败 -> %w", err)}
 	}
-	// TODO: 判断当前用户与需要修改密码的用户是否一致
-	userData, err := r.UserRepository.GetByAccount(user.Account)
+	userData, err := r.UserRepository.GetById(user.UserId)
 	if err != nil {
 		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
 	}

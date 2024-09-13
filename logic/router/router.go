@@ -63,15 +63,14 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 		{
 			userRouter.POST("/avatar", config.UserController.UploadAvatar)
 			////用户修改密码
-			userRouter.POST("/changePassword", config.UserController.ChangePassword)
+			userRouter.PUT("/changePassword", config.UserController.ChangePassword)
 			//// 更新
-			userRouter.POST("/update", config.UserController.Update)
-			////上传文件（给某个用户发送文件）
-			//userGroup.POST("/uploadFile", controller.UploadFile)
-			////查看文件（查看所有用户给自己发送的文件）
-			//userGroup.POST("/fileList", controller.GetFileList)
-			////下载文件（下载别的用户发给自己的文件）
-			//userGroup.POST("/downloadFile", controller.DownloadFile)
+			userRouter.PUT("/update", config.UserController.Update)
+			//// 创建验证码
+			userRouter.GET("/sendEmail", config.UserController.GenerateCode)
+			//// 校验验证码是否存在或者过期
+			userRouter.GET("/verifyCode", config.UserController.CheckCode)
+			//// 更换邮箱
 
 		}
 	}

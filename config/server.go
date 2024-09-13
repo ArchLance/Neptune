@@ -5,9 +5,10 @@ type ServerConfig struct {
 	//Port      int         `mapstructure:"port" json:"port" yaml:"port"`
 	//Mysqlinfo MysqlConfig `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
 	//Admininfo AdminConfig `mapstructure:"admin" json:"admin" yaml:"admin"`
-	JWTKey   JWTConfig  `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
-	DBconfig DBConfig   `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
-	BaseConf BaseConfig `mapstructure:"base" json:"base" yaml:"base"`
+	JWTConfig   JWTConfig   `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
+	MysqlConfig MysqlConfig `mapstructure:"mysql" json:"mysql" yaml:"mysql"`
+	BaseConfig  BaseConfig  `mapstructure:"base" json:"base" yaml:"base"`
+	RedisConfig RedisConfig `mapstructure:"redis" json:"redis" yaml:"redis"`
 }
 
 type JWTConfig struct {
@@ -15,12 +16,19 @@ type JWTConfig struct {
 	ExpireTime int    `mapstructure:"exp" json:"exp" yaml:"exp"`
 }
 
-type DBConfig struct {
+type MysqlConfig struct {
 	Host     string `mapstructure:"host" json:"host" yaml:"host"`
 	Port     string `mapstructure:"port" json:"port" yaml:"port"`
 	User     string `mapstructure:"user" json:"user" yaml:"user"`
 	Password string `mapstructure:"password" json:"password" yaml:"password"`
 	DbName   string `mapstructure:"dbname" json:"dbname" yaml:"dbname"`
+}
+
+type RedisConfig struct {
+	Host     string `mapstructure:"host" json:"host" yaml:"host"`
+	Port     string `mapstructure:"port" json:"port" yaml:"port"`
+	Password string `mapstructure:"password" json:"password" yaml:"password"`
+	DbName   int    `mapstructure:"dbname" json:"dbname" yaml:"dbname"`
 }
 
 type BaseConfig struct {
@@ -30,3 +38,5 @@ type BaseConfig struct {
 type Upload struct {
 	Avatar string `mapstructure:"avatar" json:"avatar" yaml:"avatar"`
 }
+
+// TODO: 邮箱配置

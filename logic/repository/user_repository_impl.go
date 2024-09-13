@@ -22,7 +22,7 @@ func (r *UserRepositoryImpl) Update(user *model.User) error {
 	}
 	return nil
 }
-func (r *UserRepositoryImpl) GetById(id int) (model.User, error) {
+func (r *UserRepositoryImpl) GetById(id uint) (model.User, error) {
 	var user model.User
 	result := r.Db.First(&user, "id=?", id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
