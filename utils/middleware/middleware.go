@@ -2,7 +2,11 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/time/rate"
 	"net/http"
+	"sync"
+	"time"
 )
 
 func Cors() gin.HandlerFunc {
@@ -20,5 +24,47 @@ func Cors() gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusNoContent)
 		}
 		c.Next()
+	}
+}
+
+var ip2limiter map[string]*Limiter
+
+type Limiter struct {
+	l       *rate.Limiter
+	timeout time.Time
+}
+
+func RateLimit(d time.Duration, times int) gin.HandlerFunc {
+	sync.OnceFunc(func() {
+		ip2limiter = make(map[string]*Limiter)
+		go func() {
+			t := time.NewTicker(5 * time.Second)
+			for range t.C {
+				now := time.Now()
+				for k, l := range ip2limiter {
+					if l == nil || l.timeout.After(now) {
+						delete(ip2limiter, k)
+					}
+				}
+			}
+		}()
+	})
+	return func(c *gin.Context) {
+		ip := c.ClientIP()
+		// get limiter
+		l, ok := ip2limiter[ip]
+		if !ok {
+			l = &Limiter{
+				l: rate.NewLimiter(rate.Every(d), times),
+			}
+		}
+		l.timeout = time.Now().Add(30 * time.Minute)
+		if l.l.Allow() {
+			c.Next()
+		} else {
+			// TODO log
+			c.Abort()
+			log.Info()
+		}
 	}
 }

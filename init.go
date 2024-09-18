@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
-	"github.com/jordan-wright/email"
 	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -15,7 +14,6 @@ import (
 	"neptune/logic/model"
 	myerrors "neptune/utils/errors"
 	"neptune/utils/logger"
-	"net/smtp"
 	"os"
 	"strings"
 )
@@ -37,18 +35,17 @@ func RedisConnection() *redis.Client {
 	return rdb
 }
 
-func initEmail() {
-	address := fmt.Sprintf("%s:%s", global.ServerConfig.MailConfig.Host, global.ServerConfig.MailConfig.Port)
-	p, err := email.NewPool(
-		address,
-		4,
-		smtp.PlainAuth("", global.ServerConfig.MailConfig.User, global.ServerConfig.MailConfig.AuthCode, global.ServerConfig.MailConfig.Host),
-	)
-	if err != nil {
-		log.Fatal("failed to create pool:", err)
-	}
-	global.EmailPool = p
-}
+//func initEmail() {
+//	address := fmt.Sprintf("%s:%s", global.ServerConfig.MailConfig.Host, global.ServerConfig.MailConfig.Port)
+//	p, err := email.NewPool(
+//		address,
+//		4,
+//		smtp.PlainAuth("", global.ServerConfig.MailConfig.User, global.ServerConfig.MailConfig.AuthCode, global.ServerConfig.MailConfig.Host),
+//	)
+//	if err != nil {
+//		log.Fatal("failed to create pool:", err)
+//	}
+//}
 
 // 初始化数据库
 func setupGorm() {
@@ -106,5 +103,4 @@ func init() {
 	}
 	initConfig()
 	setupGorm()
-	//initEmail()
 }

@@ -71,6 +71,7 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 			//// 校验验证码是否存在或者过期
 			userRouter.GET("/verifyCode", config.UserController.CheckCode)
 			//// 更换邮箱
+			userRouter.PUT("/updateEmail", config.UserController.UpdateEmail)
 
 		}
 	}

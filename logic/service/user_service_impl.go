@@ -111,3 +111,20 @@ func (r *UserServiceImpl) ChangePassword(user *request.UserChangePasswordRequest
 	}
 	return nil
 }
+
+func (r *UserServiceImpl) ChangeEmail(user *request.UserChangeEmailRequest) error {
+	err := r.Validate.Struct(user)
+	if err != nil {
+		return myerrors.ParamErr{Err: fmt.Errorf("service: 修改邮箱参数校验失败 -> %w", err)}
+	}
+	userData, err := r.UserRepository.GetById(user.UserId)
+	if err != nil {
+		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
+	}
+	userData.Email = user.Email
+	err = r.UserRepository.Update(&userData)
+	if err != nil {
+		return myerrors.DbErr{Err: fmt.Errorf("修改密码失败 -> %w", err)}
+	}
+	return nil
+}

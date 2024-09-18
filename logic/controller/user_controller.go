@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -149,48 +150,101 @@ func (c *UserController) ChangePassword(ctx *gin.Context) {
 	rsp.SuccessRspWithNoData(ctx)
 }
 
+type ExpireCode struct {
+	TimeStamp int64
+	Code      string
+}
+
 func (c *UserController) GenerateCode(ctx *gin.Context) {
 	log.Info("生成验证码")
 	// 查询用户
-	claims := jwt.GetClaims(ctx)
-	if claims == nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
-		return
+	requestEmail := ctx.Query("email")
+	generateType := ctx.Query("type")
+	if generateType == "0" {
+		claims := jwt.GetClaims(ctx)
+		if claims == nil {
+			rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+			return
+		}
+		userResponse, err := c.UserService.GetById(claims.UserID)
+		if err != nil {
+			rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
+			return
+		}
+		requestEmail = userResponse.Email
 	}
-	userResponse, err := c.UserService.GetById(claims.UserID)
-	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
-		return
-	}
+
 	// TODO： 获取redis中的验证码的过期时间，避免短时间内重复生成：
-	ok := global.Redis.Get(ctx, userResponse.Email)
-	if ok != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("请不要频繁发送验证码")})
-		return
+	res := global.Redis.Get(ctx, requestEmail)
+	if res.Val() != "" {
+		var expireCode ExpireCode
+		val, err := res.Bytes()
+		if err != nil {
+			rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码信息解析失败")})
+			return
+		}
+		err = json.Unmarshal(val, &expireCode)
+		if err != nil {
+			rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码信息解析失败")})
+			return
+		}
+		// 限制请求60秒才能更新一次，否则不更新
+		generateTime := time.Now().Unix() - expireCode.TimeStamp
+		if generateTime < 60 {
+			rsp.ErrRsp(ctx, myerrors.LogicErr{Err: fmt.Errorf("请求验证码过于频繁")})
+			return
+		}
 	}
 
 	code := random.GenValidateCode(6)
-	err = global.Redis.Set(ctx, userResponse.Email, code, 180*time.Second).Err()
+	expireCode := ExpireCode{
+		TimeStamp: time.Now().Unix(),
+		Code:      code,
+	}
+	data, _ := json.Marshal(expireCode)
+	err := global.Redis.Set(ctx, requestEmail, data, 180*time.Second).Err()
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.DbErr{Err: err})
 		return
 	}
 	emailContent := fmt.Sprintf("您的验证码是：%s，此验证码3分钟有效。", code)
-	err = email.SendEmail(userResponse.Email, "邮箱绑定验证码", emailContent)
-	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("发送邮件失败: %w", err)})
-		return
-	}
+	// 起协程发邮件
+	go func() {
+		err := email.SendEmail(requestEmail, "邮箱绑定验证码", emailContent)
+		if err != nil {
+			log.Error("发送邮件失败")
+		}
+	}()
 	rsp.SuccessRspWithNoData(ctx)
+}
+
+func checkCode(ctx *gin.Context, email string, code string) bool {
+	res := global.Redis.Get(ctx, email)
+	if res.Val() == "" {
+		rsp.ErrRsp(ctx, myerrors.NotFoundErr{Err: fmt.Errorf("验证码错误")})
+		return false
+	}
+	var expireCode ExpireCode
+	val, err := res.Bytes()
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码信息解析失败")})
+		return false
+	}
+	err = json.Unmarshal(val, &expireCode)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码信息解析失败")})
+		return false
+	}
+	if expireCode.Code != code {
+		rsp.ErrRsp(ctx, myerrors.NotFoundErr{Err: fmt.Errorf("验证码错误")})
+		return false
+	}
+	return true
 }
 
 func (c *UserController) CheckCode(ctx *gin.Context) {
 	log.Info("校验验证码")
 	requestCode := ctx.Query("code")
-	if requestCode == "" {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("验证码不能为空")})
-		return
-	}
 	claims := jwt.GetClaims(ctx)
 	if claims == nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("获取用户信息失败")})
@@ -202,13 +256,29 @@ func (c *UserController) CheckCode(ctx *gin.Context) {
 		return
 	}
 
-	code, err := global.Redis.Get(ctx, userResponse.Email).Result()
+	if checkCode(ctx, userResponse.Email, requestCode) {
+		rsp.SuccessRspWithNoData(ctx)
+	}
+
+}
+
+func (c *UserController) UpdateEmail(ctx *gin.Context) {
+	log.Info("更新邮箱")
+	changeEmail := request.UserChangeEmailRequest{}
+	err := ctx.ShouldBindJSON(&changeEmail)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.NotFoundErr{Err: fmt.Errorf("验证码错误")})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("参数错误 -> %w", err)})
 		return
 	}
-	if code != requestCode {
-		rsp.ErrRsp(ctx, myerrors.NotFoundErr{Err: fmt.Errorf("验证码错误")})
+	claims := jwt.GetClaims(ctx)
+	changeEmail.UserId = claims.UserID
+	// 如果验证码校验不通过
+	if !checkCode(ctx, changeEmail.Email, changeEmail.Code) {
+		return
+	}
+	err = c.UserService.ChangeEmail(&changeEmail)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
 	}
 	rsp.SuccessRspWithNoData(ctx)

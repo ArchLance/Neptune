@@ -18,4 +18,5 @@ type UserService interface {
 	Update(user *request.UpdateUserRequest) error
 	Login(user *request.UserLoginRequest) (response.UserLoginResponse, error)
 	ChangePassword(user *request.UserChangePasswordRequest) error
+	ChangeEmail(user *request.UserChangeEmailRequest) error
 }
