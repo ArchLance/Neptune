@@ -17,6 +17,7 @@ type ConfigRouterGroup struct {
 	BasePath          string
 	ManagerController *controller.ManagerController
 	UserController    *controller.UserController
+	AssetController   *controller.AssetController
 }
 
 func NewConfigRouterGroup() *ConfigRouterGroup {
@@ -29,10 +30,14 @@ func NewConfigRouterGroup() *ConfigRouterGroup {
 	userService := service.NewUserService(userRepository, validate)
 	userController := controller.NewUserController(userService)
 
+	assetRepository := repository.NewAssetRepository(global.DB)
+	assetService := service.NewAssetService(assetRepository, validate)
+	assetController := controller.NewAssetController(assetService)
 	return &ConfigRouterGroup{
 		BasePath:          "/api",
 		ManagerController: managerController,
 		UserController:    userController,
+		AssetController:   assetController,
 	}
 }
 
@@ -73,6 +78,15 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 			//// 更换邮箱
 			userRouter.PUT("/updateEmail", config.UserController.UpdateEmail)
 		}
+	}
+
+	assetRouter := baseRouter.Group("/asset")
+	{
+		//assetRouter.GET("", config.AssetController.GetAll)
+		//assetRouter.GET("/:id", config.AssetController.GetById)
+		assetRouter.POST("/create", config.AssetController.Create)
+		//assetRouter.POST("", config.AssetController.Update)
+		//assetRouter.DELETE("/:id", config.AssetController.Delete)
 	}
 	return routers
 }
