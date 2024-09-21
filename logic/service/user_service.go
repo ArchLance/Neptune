@@ -65,8 +65,8 @@ type UserResponse struct {
 	Role     string `json:"role"`
 }
 
-func (r *UserService) GetById(id uint) (UserResponse, error) {
-	userData, err := r.UserRepository.GetById(id)
+func (s *UserService) GetById(id uint) (UserResponse, error) {
+	userData, err := s.UserRepository.GetById(id)
 	if err != nil {
 		return UserResponse{}, myerrors.NotFoundErr{Err: err}
 	}
@@ -81,12 +81,12 @@ func (r *UserService) GetById(id uint) (UserResponse, error) {
 	return userResponse, nil
 }
 
-func (r *UserService) Update(user *UpdateUserRequest) error {
-	err := r.Validate.Struct(user)
+func (s *UserService) Update(user *UpdateUserRequest) error {
+	err := s.Validate.Struct(user)
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 更新用户参数校验失败 -> %w", err)}
 	}
-	userData, err := r.UserRepository.GetById(user.UserId)
+	userData, err := s.UserRepository.GetById(user.UserId)
 	if err != nil {
 		return myerrors.NotFoundErr{Err: err}
 	}
@@ -95,19 +95,19 @@ func (r *UserService) Update(user *UpdateUserRequest) error {
 	userData.Email = user.Email
 	userData.Avatar = user.Avatar
 	userData.Role = user.Role
-	err = r.UserRepository.Update(&userData)
+	err = s.UserRepository.Update(&userData)
 	if err != nil {
 		return myerrors.DbErr{Err: err}
 	}
 	return nil
 }
 
-func (r *UserService) Login(user *UserLoginRequest) (UserLoginResponse, error) {
-	err := r.Validate.Struct(user)
+func (s *UserService) Login(user *UserLoginRequest) (UserLoginResponse, error) {
+	err := s.Validate.Struct(user)
 	if err != nil {
 		return UserLoginResponse{}, myerrors.LoginFailed{Err: fmt.Errorf("service: 登录用户参数校验失败 -> %w", err)}
 	}
-	userData, err := r.UserRepository.GetByAccount(user.Account)
+	userData, err := s.UserRepository.GetByAccount(user.Account)
 	if err != nil {
 		return UserLoginResponse{}, myerrors.LoginFailed{Err: fmt.Errorf("用户名密码错误")}
 	}
@@ -131,12 +131,12 @@ func (r *UserService) Login(user *UserLoginRequest) (UserLoginResponse, error) {
 	return responseUser, nil
 }
 
-func (r *UserService) ChangePassword(user *UserChangePasswordRequest) error {
-	err := r.Validate.Struct(user)
+func (s *UserService) ChangePassword(user *UserChangePasswordRequest) error {
+	err := s.Validate.Struct(user)
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 修改密码参数校验失败 -> %w", err)}
 	}
-	userData, err := r.UserRepository.GetById(user.UserId)
+	userData, err := s.UserRepository.GetById(user.UserId)
 	if err != nil {
 		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
 	}
@@ -147,24 +147,24 @@ func (r *UserService) ChangePassword(user *UserChangePasswordRequest) error {
 	}
 	newPassword := hash.SHA256DoubleString(user.NewPassword, false)
 	userData.Password = newPassword
-	err = r.UserRepository.Update(&userData)
+	err = s.UserRepository.Update(&userData)
 	if err != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("修改密码失败 -> %w", err)}
 	}
 	return nil
 }
 
-func (r *UserService) ChangeEmail(user *UserChangeEmailRequest) error {
-	err := r.Validate.Struct(user)
+func (s *UserService) ChangeEmail(user *UserChangeEmailRequest) error {
+	err := s.Validate.Struct(user)
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 修改邮箱参数校验失败 -> %w", err)}
 	}
-	userData, err := r.UserRepository.GetById(user.UserId)
+	userData, err := s.UserRepository.GetById(user.UserId)
 	if err != nil {
 		return myerrors.PermissionDeniedError{Err: fmt.Errorf("权限校验失败 -> %w", err)}
 	}
 	userData.Email = user.Email
-	err = r.UserRepository.Update(&userData)
+	err = s.UserRepository.Update(&userData)
 	if err != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("修改密码失败 -> %w", err)}
 	}

@@ -15,15 +15,15 @@ type ManagerRepository struct {
 func NewManagerRepository(Db *gorm.DB) *ManagerRepository {
 	return &ManagerRepository{Db: Db}
 }
-func (r *ManagerRepository) Create(manager model.Manager) error {
-	result := r.Db.Create(&manager)
+func (r *ManagerRepository) Create(manager *model.Manager) error {
+	result := r.Db.Create(manager)
 	if result.Error != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("repository: 创建管理员失败 -> %w", result.Error)}
 	}
 	return nil
 }
-func (r *ManagerRepository) Update(manager model.Manager) error {
-	result := r.Db.Updates(&manager)
+func (r *ManagerRepository) Update(manager *model.Manager) error {
+	result := r.Db.Updates(manager)
 	if result.Error != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("repository: 更新管理员失败 -> %w", result.Error)}
 	}

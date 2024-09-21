@@ -56,7 +56,7 @@ func (r *ManagerService) Create(manager CreateManagerRequest) error {
 		Account:  manager.Account,
 		Password: manager.Password,
 	}
-	err = r.ManagerRepository.Create(managerModel)
+	err = r.ManagerRepository.Create(&managerModel)
 	if err != nil {
 		return myerrors.DbErr{Err: err}
 	}
@@ -76,7 +76,7 @@ func (r *ManagerService) Update(manager UpdateManagerRequest) error {
 	managerData.Name = manager.Name
 	managerData.Account = manager.Account
 	managerData.Password = manager.Password
-	err = r.ManagerRepository.Update(managerData)
+	err = r.ManagerRepository.Update(&managerData)
 	if err != nil {
 		return myerrors.DbErr{Err: err}
 	}

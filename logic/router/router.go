@@ -44,6 +44,7 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 	//routers.StaticFS("/media/upload/avatar", http.Dir("static/upload/avatar"))
 	// 自定义log
 	routers.Use(gin.LoggerWithConfig(gin.LoggerConfig{Formatter: logger.GinLogFormatter}), gin.Recovery())
+	// TODO: 没有验证
 	routers.StaticFS("/static/upload/avatar", http.Dir("static/upload/avatar"))
 	baseRouter := routers.Group(config.BasePath)
 
