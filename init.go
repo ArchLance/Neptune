@@ -35,18 +35,6 @@ func RedisConnection() *redis.Client {
 	return rdb
 }
 
-//func initEmail() {
-//	address := fmt.Sprintf("%s:%s", global.ServerConfig.MailConfig.Host, global.ServerConfig.MailConfig.Port)
-//	p, err := email.NewPool(
-//		address,
-//		4,
-//		smtp.PlainAuth("", global.ServerConfig.MailConfig.User, global.ServerConfig.MailConfig.AuthCode, global.ServerConfig.MailConfig.Host),
-//	)
-//	if err != nil {
-//		log.Fatal("failed to create pool:", err)
-//	}
-//}
-
 // 初始化数据库
 func setupGorm() {
 

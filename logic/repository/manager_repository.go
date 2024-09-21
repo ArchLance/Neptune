@@ -8,28 +8,28 @@ import (
 	myerrors "neptune/utils/errors"
 )
 
-type ManagerRepositoryImpl struct {
+type ManagerRepository struct {
 	Db *gorm.DB
 }
 
-func NewManagerRepositoryImpl(Db *gorm.DB) *ManagerRepositoryImpl {
-	return &ManagerRepositoryImpl{Db: Db}
+func NewManagerRepository(Db *gorm.DB) *ManagerRepository {
+	return &ManagerRepository{Db: Db}
 }
-func (r *ManagerRepositoryImpl) Create(manager model.Manager) error {
+func (r *ManagerRepository) Create(manager model.Manager) error {
 	result := r.Db.Create(&manager)
 	if result.Error != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("repository: 创建管理员失败 -> %w", result.Error)}
 	}
 	return nil
 }
-func (r *ManagerRepositoryImpl) Update(manager model.Manager) error {
+func (r *ManagerRepository) Update(manager model.Manager) error {
 	result := r.Db.Updates(&manager)
 	if result.Error != nil {
 		return myerrors.DbErr{Err: fmt.Errorf("repository: 更新管理员失败 -> %w", result.Error)}
 	}
 	return nil
 }
-func (r *ManagerRepositoryImpl) Delete(id int) error {
+func (r *ManagerRepository) Delete(id int) error {
 	var manager model.Manager
 	result := r.Db.Where("id = ?", id).Delete(&manager)
 	if result.Error != nil {
@@ -37,7 +37,7 @@ func (r *ManagerRepositoryImpl) Delete(id int) error {
 	}
 	return nil
 }
-func (r *ManagerRepositoryImpl) GetById(id int) (model.Manager, error) {
+func (r *ManagerRepository) GetById(id int) (model.Manager, error) {
 	var findManager model.Manager
 	result := r.Db.First(&findManager, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -45,7 +45,7 @@ func (r *ManagerRepositoryImpl) GetById(id int) (model.Manager, error) {
 	}
 	return findManager, nil
 }
-func (r *ManagerRepositoryImpl) GetAll() ([]model.Manager, error) {
+func (r *ManagerRepository) GetAll() ([]model.Manager, error) {
 	var managers []model.Manager
 	result := r.Db.Find(&managers)
 	if result.Error != nil {
@@ -56,7 +56,7 @@ func (r *ManagerRepositoryImpl) GetAll() ([]model.Manager, error) {
 	}
 	return managers, nil
 }
-func (r *ManagerRepositoryImpl) ExistById(id int) (bool, error) {
+func (r *ManagerRepository) ExistById(id int) (bool, error) {
 	var manager model.Manager
 	result := r.Db.First(&manager, id)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
@@ -64,7 +64,7 @@ func (r *ManagerRepositoryImpl) ExistById(id int) (bool, error) {
 	}
 	return true, nil
 }
-func (r *ManagerRepositoryImpl) ExistByAccount(account string) (bool, error) {
+func (r *ManagerRepository) ExistByAccount(account string) (bool, error) {
 	var manager model.Manager
 	result := r.Db.First(&manager, "account = ?", account)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {

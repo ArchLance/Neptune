@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"neptune/global"
-	"neptune/logic/data/request"
 	"neptune/logic/service"
 	email "neptune/utils/email"
 	myerrors "neptune/utils/errors"
@@ -24,10 +23,10 @@ import (
 )
 
 type UserController struct {
-	UserService service.UserService
+	UserService *service.UserService
 }
 
-func NewUserController(service service.UserService) *UserController {
+func NewUserController(service *service.UserService) *UserController {
 	return &UserController{
 		UserService: service,
 	}
@@ -35,7 +34,7 @@ func NewUserController(service service.UserService) *UserController {
 
 func (c *UserController) Update(ctx *gin.Context) {
 	log.Info("controller: 更新用户")
-	updateUserRequest := request.UpdateUserRequest{}
+	updateUserRequest := service.UpdateUserRequest{}
 	err := ctx.ShouldBind(&updateUserRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 获取更新用户参数失败 -> %w", err)})
@@ -54,7 +53,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 
 func (c *UserController) Login(ctx *gin.Context) {
 	log.Info("controller: 登录")
-	loginRequest := request.UserLoginRequest{}
+	loginRequest := service.UserLoginRequest{}
 	err := ctx.ShouldBind(&loginRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
@@ -98,7 +97,7 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 			rsp.ErrRsp(ctx, myerrors.UploadError{Err: fmt.Errorf("获取用户信息失败")})
 			return
 		}
-		userRequest := request.UpdateUserRequest{
+		userRequest := service.UpdateUserRequest{
 			UserId:   claims.UserID,
 			Avatar:   fmt.Sprintf("%s%s", fileName, fileExt),
 			UserName: userResponse.UserName,
@@ -134,7 +133,7 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 
 func (c *UserController) ChangePassword(ctx *gin.Context) {
 	log.Info("用户修改密码")
-	changePassword := request.UserChangePasswordRequest{}
+	changePassword := service.UserChangePasswordRequest{}
 	err := ctx.ShouldBindJSON(&changePassword)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("参数错误 -> %w", err)})
@@ -264,7 +263,7 @@ func (c *UserController) CheckCode(ctx *gin.Context) {
 
 func (c *UserController) UpdateEmail(ctx *gin.Context) {
 	log.Info("更新邮箱")
-	changeEmail := request.UserChangeEmailRequest{}
+	changeEmail := service.UserChangeEmailRequest{}
 	err := ctx.ShouldBindJSON(&changeEmail)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("参数错误 -> %w", err)})

@@ -3,26 +3,45 @@ package service
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"neptune/logic/data/request"
-	"neptune/logic/data/response"
 	"neptune/logic/model"
 	"neptune/logic/repository"
 	myerrors "neptune/utils/errors"
 )
 
-type ManagerServiceImpl struct {
-	ManagerRepository repository.ManagerRepository
+type ManagerService struct {
+	ManagerRepository *repository.ManagerRepository
 	Validate          *validator.Validate
 }
 
-func NewManagerServiceImpl(repository repository.ManagerRepository, validate *validator.Validate) *ManagerServiceImpl {
-	return &ManagerServiceImpl{
+func NewManagerService(repository *repository.ManagerRepository, validate *validator.Validate) *ManagerService {
+	return &ManagerService{
 		ManagerRepository: repository,
 		Validate:          validate,
 	}
 }
 
-func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error {
+type CreateManagerRequest struct {
+	Level    int    `json:"level"`
+	Name     string `validate:"required,max=255,min=1" json:"name"`
+	Account  string `validate:"required,max=255,min=1" json:"account"`
+	Password string `validate:"required,max=255,min=1" json:"password"`
+}
+type UpdateManagerRequest struct {
+	Id       int    `json:"id"`
+	Level    int    `json:"level"`
+	Name     string `validate:"required,max=255,min=1" json:"name"`
+	Account  string `validate:"required,max=255,min=1" json:"account"`
+	Password string `validate:"required,max=255,min=1" json:"password"`
+}
+type ManagerResponse struct {
+	Id       int
+	Level    int    `json:"level"`
+	Name     string `json:"name"`
+	Account  string `json:"account"`
+	Password string `json:"password"`
+}
+
+func (r *ManagerService) Create(manager CreateManagerRequest) error {
 	err := r.Validate.Struct(manager)
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 创建管理员参数校验失败 -> %w", err)}
@@ -44,7 +63,7 @@ func (r *ManagerServiceImpl) Create(manager request.CreateManagerRequest) error 
 	return nil
 }
 
-func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error {
+func (r *ManagerService) Update(manager UpdateManagerRequest) error {
 	err := r.Validate.Struct(manager)
 	if err != nil {
 		return myerrors.ParamErr{Err: fmt.Errorf("service: 更新管理员参数校验失败 -> %w", err)}
@@ -64,7 +83,7 @@ func (r *ManagerServiceImpl) Update(manager request.UpdateManagerRequest) error 
 	return nil
 }
 
-func (r *ManagerServiceImpl) Delete(id int) error {
+func (r *ManagerService) Delete(id int) error {
 	err := r.ManagerRepository.Delete(id)
 	if err != nil {
 		return myerrors.DbErr{Err: err}
@@ -72,12 +91,12 @@ func (r *ManagerServiceImpl) Delete(id int) error {
 	return nil
 }
 
-func (r *ManagerServiceImpl) GetById(id int) (response.ManagerResponse, error) {
+func (r *ManagerService) GetById(id int) (ManagerResponse, error) {
 	managerData, err := r.ManagerRepository.GetById(id)
 	if err != nil {
-		return response.ManagerResponse{}, myerrors.NotFoundErr{Err: err}
+		return ManagerResponse{}, myerrors.NotFoundErr{Err: err}
 	}
-	managerResponse := response.ManagerResponse{
+	managerResponse := ManagerResponse{
 		Level:    managerData.Level,
 		Name:     managerData.Name,
 		Account:  managerData.Account,
@@ -86,14 +105,14 @@ func (r *ManagerServiceImpl) GetById(id int) (response.ManagerResponse, error) {
 	return managerResponse, nil
 }
 
-func (r *ManagerServiceImpl) GetAll() ([]response.ManagerResponse, error) {
+func (r *ManagerService) GetAll() ([]ManagerResponse, error) {
 	result, err := r.ManagerRepository.GetAll()
 	if err != nil {
-		return []response.ManagerResponse{}, myerrors.NotFoundErr{Err: err}
+		return []ManagerResponse{}, myerrors.NotFoundErr{Err: err}
 	}
-	var managers []response.ManagerResponse
+	var managers []ManagerResponse
 	for _, manager := range result {
-		manager := response.ManagerResponse{
+		manager := ManagerResponse{
 			Id:       manager.Id,
 			Level:    manager.Level,
 			Name:     manager.Name,

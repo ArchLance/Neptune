@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"neptune/logic/data/request"
 	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
 	"neptune/utils/rsp"
@@ -12,10 +11,10 @@ import (
 )
 
 type ManagerController struct {
-	ManagerService service.ManagerService
+	ManagerService *service.ManagerService
 }
 
-func NewManagerController(service service.ManagerService) *ManagerController {
+func NewManagerController(service *service.ManagerService) *ManagerController {
 	return &ManagerController{
 		ManagerService: service,
 	}
@@ -23,7 +22,7 @@ func NewManagerController(service service.ManagerService) *ManagerController {
 
 func (controller *ManagerController) Create(ctx *gin.Context) {
 	log.Info("controller: 创建管理员")
-	createManagerRequest := request.CreateManagerRequest{}
+	createManagerRequest := service.CreateManagerRequest{}
 	err := ctx.ShouldBind(&createManagerRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 获取创建管理员参数失败 -> %w", err)})
@@ -40,7 +39,7 @@ func (controller *ManagerController) Create(ctx *gin.Context) {
 
 func (controller *ManagerController) Update(ctx *gin.Context) {
 	log.Info("controller: 更新管理员")
-	updateManagerRequest := request.UpdateManagerRequest{}
+	updateManagerRequest := service.UpdateManagerRequest{}
 	err := ctx.ShouldBind(&updateManagerRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 获取更新管理员参数失败 -> %w", err)})
