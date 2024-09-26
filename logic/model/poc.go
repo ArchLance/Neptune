@@ -2,6 +2,8 @@ package model
 
 // 漏洞类型
 const (
+	// 最小值
+	VulnerabilityTypeMin = 0
 	// ArbitraryFileRead 任意文件读取
 	ArbitraryFileRead = 1
 	// ArbitraryFileUpload 文件上传
@@ -33,26 +35,28 @@ const (
 	// PermissionBypass 权限绕过
 	PermissionBypass = 15
 	// FileInclusion 文件包含
-	FileInclusion  = 16
-	PLACEHOLDER_17 = 17
-	PLACEHOLDER_18 = 18
-	PLACEHOLDER_19 = 19
-	PLACEHOLDER_20 = 20
+	FileInclusion = 16
+	// 最大值
+	VulnerabilityTypeMax = 17
+	PLACEHOLDER_17       = 18
+	PLACEHOLDER_18       = 19
+	PLACEHOLDER_19       = 20
+	PLACEHOLDER_20       = 21
 )
 
 type Poc struct {
 	// 主键
-	Id int `gorm:"type:int;primary_key;AUTO_INCREMENT"`
+	Id int `gorm:"type:int;primary_key;AUTO_INCREMENT" json:"id"`
 	// 漏洞编号
-	VulnerabilityName string `gorm:"type:varchar(64)"`
+	VulnerabilityName string `gorm:"type:varchar(64)" json:"vulnerability_name"`
 	// poc名称
-	PocName string `gorm:"type:varchar(64);not null;unique"`
+	PocName string `gorm:"type:varchar(64);not null;unique" json:"poc_name"`
 	// 应用名称
-	AppName string `gorm:"type:varchar(64)"`
+	AppName string `gorm:"type:varchar(64)" json:"app_name"`
 	// 漏洞类型
-	VulnerabilityType int `gorm:"type:int"`
+	VulnerabilityType int `gorm:"type:int" json:"vulnerability_type"`
 	// 添加时间
-	AddTime string `gorm:"type:varchar(64)"`
+	AddTime string `gorm:"type:varchar(64)" json:"add_time"`
 	// poc内容
-	PocContent string `gorm:"type:text"`
+	PocContent string `gorm:"type:text" json:"poc_content"`
 }

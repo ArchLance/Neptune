@@ -43,6 +43,8 @@ func setupGorm() {
 	myerrors.ErrorPanic(err)
 	err = db.Table("user").AutoMigrate(&model.User{})
 	myerrors.ErrorPanic(err)
+	err = db.Table("poc").AutoMigrate(&model.Poc{})
+	myerrors.ErrorPanic(err)
 	global.Redis = RedisConnection()
 	global.DB = db
 }

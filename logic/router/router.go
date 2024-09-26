@@ -17,6 +17,7 @@ type ConfigRouterGroup struct {
 	BasePath          string
 	ManagerController *controller.ManagerController
 	UserController    *controller.UserController
+	PocController     *controller.PocController
 }
 
 func NewConfigRouterGroup() *ConfigRouterGroup {
@@ -29,10 +30,15 @@ func NewConfigRouterGroup() *ConfigRouterGroup {
 	userService := service.NewUserService(userRepository, validate)
 	userController := controller.NewUserController(userService)
 
+	pocRepository := repository.NewPocRepository(global.DB)
+	pocService := service.NewPocService(pocRepository, validate)
+	pocController := controller.NewPocController(pocService)
+
 	return &ConfigRouterGroup{
 		BasePath:          "/api",
 		ManagerController: managerController,
 		UserController:    userController,
+		PocController:     pocController,
 	}
 }
 
@@ -75,5 +81,14 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 			userRouter.PUT("/updateEmail", config.UserController.UpdateEmail)
 		}
 	}
+
+	pocRouter := baseRouter.Group("/poc")
+	//pocRouter.Use(token.JWTAuth())
+	//{
+	pocRouter.POST("/create", config.PocController.Create)
+	pocRouter.PUT("/update", config.PocController.Update)
+	pocRouter.DELETE("/", config.PocController.Delete)
+	pocRouter.GET("/", config.PocController.PocFilter)
+	//}
 	return routers
 }

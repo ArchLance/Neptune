@@ -6,7 +6,7 @@ const (
 	CodePermissionDeny  = 10001 // 权限不足
 	CodeLoginFailed     = 10002 // 登录失败
 	CodeErrTokenInvalid = 10003 // token无效
-	CodeRequestFailed   = 10004 // 请求失败
+	CodeRequestError    = 10004 // 请求失败
 	CodeParamInvalid    = 10005 // 非法参数
 	CodeUploadError     = 10006 // 上传失败
 	CodeDbError         = 10007 // 数据库错误

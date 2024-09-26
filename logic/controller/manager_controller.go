@@ -59,7 +59,7 @@ func (controller *ManagerController) Delete(ctx *gin.Context) {
 	managerId := ctx.Param("id")
 	id, err := strconv.Atoi(managerId)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 删除时转换id %s 失败 -> %w", managerId, err)})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
 	}
 
@@ -76,7 +76,7 @@ func (controller *ManagerController) GetById(ctx *gin.Context) {
 	managerId := ctx.Param("id")
 	id, err := strconv.Atoi(managerId)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 查找时转换id %s 失败 -> %w", managerId, err)})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
 	}
 	manager, err := controller.ManagerService.GetById(id)

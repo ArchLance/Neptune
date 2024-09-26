@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"gorm.io/gorm"
 	"neptune/logic/model"
 	myerrors "neptune/utils/errors"
@@ -16,9 +15,12 @@ func NewUserRepository(Db *gorm.DB) *UserRepository {
 	return &UserRepository{Db: Db}
 }
 func (r *UserRepository) Update(user *model.User) error {
-	result := r.Db.Updates(&user)
+	result := r.Db.Where("id = ?", user.Id).Updates(&user)
 	if result.Error != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("repository: 更新用户失败 -> %w", result.Error)}
+		return myerrors.DbErr{Err: result.Error}
+	}
+	if result.RowsAffected == 0 {
+		return myerrors.RequestErr{Err: errors.New("更新失败，请检查参数")}
 	}
 	return nil
 }

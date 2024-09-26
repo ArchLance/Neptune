@@ -37,7 +37,7 @@ func (c *UserController) Update(ctx *gin.Context) {
 	updateUserRequest := service.UpdateUserRequest{}
 	err := ctx.ShouldBind(&updateUserRequest)
 	if err != nil {
-		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: fmt.Errorf("controller: 获取更新用户参数失败 -> %w", err)})
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
 	}
 	// 防止构造随便一个用户的id就可以修改其密码
@@ -107,7 +107,7 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 		}
 		err = c.UserService.Update(&userRequest)
 		if err != nil {
-			rsp.ErrRsp(ctx, myerrors.UploadError{Err: fmt.Errorf("数据库更新用户信息失败")})
+			rsp.ErrRsp(ctx, myerrors.UploadError{Err: err})
 			return
 		}
 		fileDir := global.ServerConfig.BaseConfig.Upload.Avatar
@@ -115,14 +115,14 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 		if !isExist {
 			err := os.Mkdir(fileDir, os.ModePerm)
 			if err != nil {
-				rsp.ErrRsp(ctx, myerrors.UploadError{Err: fmt.Errorf("创建文件夹失败")})
+				rsp.ErrRsp(ctx, myerrors.UploadError{Err: err})
 				return
 			}
 		}
 		filepath := fmt.Sprintf("%s%s%s", fileDir, fileName, fileExt)
 		err = ctx.SaveUploadedFile(f, filepath)
 		if err != nil {
-			rsp.ErrRsp(ctx, myerrors.UploadError{Err: fmt.Errorf("服务器保存图片失败")})
+			rsp.ErrRsp(ctx, myerrors.UploadError{Err: err})
 			return
 		}
 		rsp.SuccessRsp(ctx, gin.H{

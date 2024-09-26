@@ -15,13 +15,6 @@ func errRsp(c *gin.Context, codeErr int, codeErrMsg string) {
 	})
 }
 
-func authErrRsp(c *gin.Context, codeErr int, codeErrMsg string) {
-	c.JSON(http.StatusUnauthorized, gin.H{
-		"code": codeErr,
-		"msg":  codeErrMsg,
-	})
-}
-
 func ErrRsp(c *gin.Context, err error) {
 	//var requestErr errorType.RequestErr
 	var tokenInvalidErr errorType.TokenInvalidErr
@@ -32,6 +25,8 @@ func ErrRsp(c *gin.Context, err error) {
 	var notFoundErr errorType.NotFoundErr
 	var existErr errorType.ExistErr
 	var uploadErr errorType.UploadError
+	var requestErr errorType.RequestErr
+	var permissionDeniedErr errorType.PermissionDeniedError
 	switch {
 	case errors.As(err, &tokenInvalidErr):
 		errRsp(c, errorType.CodeErrTokenInvalid, err.Error())
@@ -49,8 +44,12 @@ func ErrRsp(c *gin.Context, err error) {
 		errRsp(c, errorType.CodeLogicError, err.Error())
 	case errors.As(err, &uploadErr):
 		errRsp(c, errorType.CodeUploadError, err.Error())
+	case errors.As(err, &requestErr):
+		errRsp(c, errorType.CodeRequestError, err.Error())
+	case errors.As(err, &permissionDeniedErr):
+		errRsp(c, errorType.CodePermissionDeny, err.Error())
 	default:
-		errRsp(c, errorType.CodeUnknown, "未知错误")
+		errRsp(c, errorType.CodeUnknown, err.Error())
 	}
 }
 
