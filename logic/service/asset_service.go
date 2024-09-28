@@ -42,6 +42,10 @@ type AssetResponse struct {
 	IpNumber    int    `json:"ip_number" validate:"required"`
 }
 
+type IdsReq struct {
+	Ids []int `json:"ids" form:"ids"`
+}
+
 func CalculateIpNumber(ipList string) int {
 	return len(strings.Split(ipList, ","))
 }
@@ -64,7 +68,7 @@ func (a UpdateAssetRequest) toModel() *model.Asset {
 	}
 }
 
-func (r *AssetService) GetById(id uint) (AssetResponse, error) {
+func (r *AssetService) GetById(id int) (AssetResponse, error) {
 	assetData, err := r.AssetRepository.GetById(id)
 	if err != nil {
 		return AssetResponse{}, myerrors.NotFoundErr{Err: err}
@@ -92,27 +96,19 @@ func (r *AssetService) Create(assetRequest *CreateAssetRequest) error {
 	return nil
 }
 
-func (r *AssetService) Delete(id uint) error {
-	err := r.AssetRepository.Delete(id)
-	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 删除资产失败 -> %w", err)}
-	}
-	return nil
+func (r *AssetService) Delete(id int) error {
+	return r.AssetRepository.Delete(id)
 }
 
-func (r *AssetService) Update(assetRequest UpdateAssetRequest) error {
-	err := r.AssetRepository.Update(assetRequest.toModel())
-	if err != nil {
-		return myerrors.DbErr{Err: fmt.Errorf("service: 更新资产失败 -> %w", err)}
-	}
-	return nil
+func (r *AssetService) Update(assetRequest *UpdateAssetRequest) error {
+	return r.AssetRepository.Update(assetRequest.toModel())
 
 }
 
-//func (r *AssetService) GetAll() (error, []AssetResponse) {
-//	assetData, err := r.AssetRepository.GetAll()
-//	if err != nil {
-//		return myerrors.DbErr{Err: fmt.Errorf("service: 获取所有资产失败 -> %w", err)}, nil
-//	}
-//	return nil, assetData.toResponses()
-//}
+func (r *AssetService) GetAll() ([]model.Asset, error) {
+	return r.AssetRepository.GetAll()
+}
+
+func (r *AssetService) DeleteByIds(ids *IdsReq) error {
+	return r.AssetRepository.DeleteByIds(ids.Ids)
+}

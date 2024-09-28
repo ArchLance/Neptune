@@ -81,12 +81,14 @@ func NewRouter(config *ConfigRouterGroup) *gin.Engine {
 	}
 
 	assetRouter := baseRouter.Group("/asset")
+	assetRouter.Use(token.JWTAuth())
 	{
-		//assetRouter.GET("", config.AssetController.GetAll)
-		//assetRouter.GET("/:id", config.AssetController.GetById)
+		assetRouter.GET("/list", config.AssetController.GetAssetList)
+		assetRouter.GET("/:id", config.AssetController.GetById)
 		assetRouter.POST("/create", config.AssetController.Create)
-		//assetRouter.POST("", config.AssetController.Update)
-		//assetRouter.DELETE("/:id", config.AssetController.Delete)
+		assetRouter.POST("/update", config.AssetController.Update)
+		assetRouter.DELETE("/:id", config.AssetController.Delete)
+		assetRouter.POST("/delete", config.AssetController.BatchDelete)
 	}
 	return routers
 }
