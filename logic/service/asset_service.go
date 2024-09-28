@@ -6,6 +6,7 @@ import (
 	"neptune/logic/model"
 	"neptune/logic/repository"
 	myerrors "neptune/utils/errors"
+	"net"
 	"strings"
 )
 
@@ -50,12 +51,50 @@ func CalculateIpNumber(ipList string) int {
 	return len(strings.Split(ipList, ","))
 }
 
+// FilterIpList TODO: 处理IPList
+// 两条规则：1. 将输入的ipList中的分隔符进行统一化处理，统一处理为英文逗号，可接受的分隔符为换行符和英文逗号
+// 2. 去掉ipList中的重复资产，分为两步，首先将所有域名资产转换为ip地址 ,然后为没有scheme的ip添加http://和https://，最后去除重复行
+func FilterIpList(ipList string) string {
+	// Step 1: Normalize separators
+	normalized := strings.ReplaceAll(ipList, "\n", ",")
+	items := strings.Split(normalized, ",")
+	// Step 2: Convert domains to IPs and add schemes
+	uniqueItems := make(map[string]bool)
+	for _, item := range items {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		// Convert domain to IP if possible
+		if ip := net.ParseIP(item); ip == nil {
+			ips, err := net.LookupIP(item)
+			if err == nil && len(ips) > 0 {
+				item = ips[0].String()
+			}
+		}
+		// Add schemes if missing
+		if !strings.Contains(item, "://") {
+			uniqueItems["http://"+item] = true
+			uniqueItems["https://"+item] = true
+		} else {
+			uniqueItems[item] = true
+		}
+	}
+	// Convert unique items back to a comma-separated string
+	result := []string{}
+	for item := range uniqueItems {
+		result = append(result, item)
+	}
+	return strings.Join(result, ",")
+}
+
 func (a CreateAssetRequest) toModel() *model.Asset {
+	newIpList := FilterIpList(a.IpList)
 	return &model.Asset{
 		AssetName:   a.AssetName,
 		ProductName: a.ProductName,
-		IpList:      a.IpList,
-		IpNumber:    CalculateIpNumber(a.IpList),
+		IpList:      newIpList,
+		IpNumber:    CalculateIpNumber(newIpList),
 	}
 }
 
