@@ -1,9 +1,12 @@
 package controller
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 	"neptune/logic/repository"
 	"neptune/logic/service"
 	myerrors "neptune/utils/errors"
@@ -21,10 +24,36 @@ func NewPocController(service *service.PocService) *PocController {
 	}
 }
 
+func validateAndFormatYAML(input string) (string, error) {
+	// 解析 YAML
+	var data interface{}
+	err := yaml.Unmarshal([]byte(input), &data)
+	if err != nil {
+		return "", fmt.Errorf("无效的 YAML 格式: %v", err)
+	}
+
+	// 格式化 YAML
+	var buf bytes.Buffer
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2) // 设置缩进为 2 个空格
+
+	err = encoder.Encode(data)
+	if err != nil {
+		return "", fmt.Errorf("格式化 YAML 时出错: %v", err)
+	}
+
+	return buf.String(), nil
+}
+
 func (c *PocController) Create(ctx *gin.Context) {
 	log.Info("controller: 创建poc")
 	createPocRequest := service.PocRequest{}
 	err := ctx.ShouldBind(&createPocRequest)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
+		return
+	}
+	createPocRequest.PocContent, err = validateAndFormatYAML(createPocRequest.PocContent)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
@@ -39,13 +68,18 @@ func (c *PocController) Create(ctx *gin.Context) {
 
 func (c *PocController) Update(ctx *gin.Context) {
 	log.Info("controller: 更新poc")
-	UpdatePocRequest := service.PocRequest{}
-	err := ctx.ShouldBind(&UpdatePocRequest)
+	updatePocRequest := service.PocRequest{}
+	err := ctx.ShouldBind(&updatePocRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
 		return
 	}
-	err = c.PocService.Update(&UpdatePocRequest)
+	updatePocRequest.PocContent, err = validateAndFormatYAML(updatePocRequest.PocContent)
+	if err != nil {
+		rsp.ErrRsp(ctx, myerrors.ParamErr{Err: err})
+		return
+	}
+	err = c.PocService.Update(&updatePocRequest)
 	if err != nil {
 		rsp.ErrRsp(ctx, err)
 		return

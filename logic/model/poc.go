@@ -3,7 +3,7 @@ package model
 // 漏洞类型
 const (
 	// 最小值
-	VulnerabilityTypeMin = 0
+	VulnerabilityTypeMin = iota
 	// ArbitraryFileRead 任意文件读取
 	ArbitraryFileRead = 1
 	// ArbitraryFileUpload 文件上传
